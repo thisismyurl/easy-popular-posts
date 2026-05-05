@@ -14,6 +14,6 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 global $wpdb;
 
 // Remove all post-meta rows created by the plugin.
-$wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+$wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	"DELETE FROM {$wpdb->postmeta} WHERE meta_key LIKE '_easy-popular-posts-%'"
 );
