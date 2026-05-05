@@ -1,0 +1,25 @@
+# Composer
+/vendor/
+composer.lock
+
+# Node
+/node_modules/
+npm-debug.log*
+
+# Build artefacts
+*.zip
+*.tar.gz
+
+# WordPress
+*.mo
+!languages/*.mo
+
+# IDEs
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,156 +1,70 @@
 === Easy Popular Posts ===
-Contributors: christopherross,thisismyurl
-Plugin URI: http://thisismyurl.com/downloads/easy-popular-posts/
-Tags: wordpress,easy,popular,posts,theme,php,code,sidebar,list posts,  plugin, post, posts
-Donate link: http://thisismyurl.com/downloads/
-Requires at least: 3.2.0
-Tested up to: 4.1.0
-Stable tag: 15.01.12
+Contributors: christopherross
+Tags: popular posts, popular, sidebar, widget
+Requires at least: 6.0
+Tested up to: 6.8
+Requires PHP: 7.4
+Stable tag: 26.05.0
+License: GPL-2.0-or-later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-An easy to use WordPress function to add popular posts to any theme.
+An easy-to-use WordPress widget and shortcode to add popular posts to any theme.
 
 == Description ==
 
-This easy to use WordPress plugin is designed to add a new feature for theme developers. Used on many of my own websites as well as those of my clients, the plugin allows me to quickly add a collection of popular posts to any theme element.
+**Easy Popular Posts** lets you display your most popular posts in any sidebar or widget area. Popularity is ranked by pageviews or comment count — no external service required.
 
-The plugin can easily be used by website owners as a WordPress Widget, adding lists of posts to the Sidebar of a WordPress website.
+Features:
 
-= About the plugin =
-
-More advanced users can also call the functionality of the plugin from a WordPress shortcode by adding the code `[thisismyurl_easy_popular_posts]` to any Post or Page within WordPress.
-
-Finally, theme authors may also take advantage of the plugin by calling the functionality directly from theme files with the code `thisismyurl_easy_popular_posts();`.
-
-This plugin is maintained by Christopher Ross, http://thisismyurl.com/ or you can find him on Twitter at http://twitter.com/thisismyurl/. 
-
-Questions about this plugin can be posted to the WordPress.org forums at https://wordpress.org/plugins/easy-popular-posts/, or to the Issues tab at the GitHub https://github.com/thisismyurl/easy-popular-posts repository for the plugin. 
-
-This plugin is currently available in:
-
-* English
-* French
-* German
+* Sidebar widget and `[thisismyurl_easy_popular_posts]` shortcode
+* Rank by pageviews or comment count
+* Optional featured image, excerpt, and nofollow support
+* No external API calls — all data stored locally in post meta
+* Multilingual (en, de_DE, fr_FR, fr_CA)
 
 == Installation ==
 
-To install the plugin, please upload the plugin folder to your plugins folder and active the plugin.
-
-== Screenshots ==
-
-
-
-
-1. The Widget Control Panel
-
-== Updates ==
-
-Updates to this plugin will be posted to the GitHub repository for testing prior to updates on WordPress.org, if you'd like to help make this plugin better please consider taking part in regular code reviews of releases at the GitHub repository.
+1. Upload the plugin to `/wp-content/plugins/`.
+2. Activate it through **Plugins > Installed Plugins**.
+3. Add the **Easy Popular Posts** widget to a sidebar or use the shortcode `[thisismyurl_easy_popular_posts]`.
 
 == Frequently Asked Questions ==
 
-= Can I display the Widget? =
+= How is popularity tracked? =
 
-Access your Widget control panel at Appearance > Widgets to add it to your theme.
+On every single-post page load, the plugin increments a pageview counter stored in post meta (`_easy-popular-posts-pageviews`). Comment counts are read directly from WordPress.
 
-= Can I display the contents as a shortcode? =
+= Can I style the output? =
 
-Yes, the shortcode can be viewed within a post as: `[thisismyurl_easy_popular_posts]`
+Yes. The widget outputs a `<ul>` with class `widget_thisismyurl_popular_posts`. Add CSS in your theme.
 
-= How do I display the results in a theme file? =
+== Changelog ==
 
-`thisismyurl_easy_popular_posts();` will display the results as a PHP function in WordPress theme files.
-
-== Donations ==
-
-Open source software such as this free WordPress plugin only work through the hard work of community members, volunteering their time or resources to make the software freely available. If you would like to show your support for this software, please consider donating towards the development effort. http://thisismyurl.com/downloads/
-
-If you can't contribute to the plugin in any other way, please consider translating it to your local language.
-
-== Change Log ==
+= 26.05.0 =
+* Removed all dead social-share API calls (Twitter/Facebook/LinkedIn/StumbleUpon APIs are shut down).
+* Removed social display methods from widget dropdown; ranking is now pageviews or comments only.
+* Migrated widget to `parent::__construct()` and `$this->get_field_id()` / `$this->get_field_name()`.
+* Fixed `posts_per_page` typo (was `post_per_page`) in `get_posts()` args.
+* Fixed variable reference in featured-image lookup.
+* Hardened widget `update()` with `sanitize_text_field`, `absint`, and allowlist for `display_method`.
+* Replaced `extract($args)` in widget `widget()` with direct array access.
+* Renamed `langs/` to `languages/`; fixed `load_plugin_textdomain()` path.
+* Added fr_CA translation.
+* Updated all HTTP URIs to HTTPS.
+* Bumped "Requires at least" to 6.0 and "Requires PHP" to 7.4.
 
 = 15.01.12 =
-
-* Fixed an error displaying the plugin as a PHP call
-* Cleaned up inline documentation
-
+* Minor maintenance release.
 
 = 15.01 =
+* Initial public release.
 
-* Rewrote plugin core
-* Added better error checking
-* Moved to 15.01 plugin structure
-* Made plugin OOP
-* added support for RAND, ASC, DESC sorting
-* Tested for WordPress 4.1
+== Upgrade Notice ==
 
-= 2.1.4 =
+= 26.05.0 =
+This release removes all deprecated social-share API integrations. Existing pageview and comment counts are preserved.
 
-* Fixed popular setting
+== Screenshots ==
 
-= 2.1.2 = 
+1. Widget settings panel in the WordPress customiser.
 
-* Added thumbnail option
-* Added excerpt option
-* Added optional credit link
-
-= 2.0 =
-
-* Tested up to WordPress 3.2
-* Added controls to Widget
-* Renamed functions for compatibility
-* Reduced font size on credit link
-
-
-= 1.7 =
-
-* Added shortcode
-* Replaced widget code with WP_Widget class
-* Added comments option to filter
-
-
-= 1.6.6 =
-
-* Cleaned up code for 3.0.3
-* Fixed credit line to work reliably
-* Removed RSS feed
-
-
-= 1.6.5 =
-
-* Added new widget controls
-
-= 1.5.5 =
-
-* Updated RSS links
-* Code optimizations
-
-= 1.5.2 =
-
-* Fixed documentation
-* Updated Links
-
-= 1.5.1 =
-
-* Added widget
-
-= 1.5.0 =
-
-* Rewrote common functions
-* Removed options page (no options)
-* Added credit option to plugin
-
-= 1.1.5  =
-
-* WP2.8.6 Compatibility Review, documentation fixes
-
-= 1.1.0   =
-
-* WP2.8 Compatibility Fixes
-
-= 1.0.0 =
-
-* Official Release
-
-= 0.1.0 =
-
-* Added admin menus

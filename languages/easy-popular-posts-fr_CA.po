@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Easy Random Posts v15.01\n"
+"Project-Id-Version: Easy Popular Posts v26.05.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
 "PO-Revision-Date: 2026-05-04 23:47+0000\n"

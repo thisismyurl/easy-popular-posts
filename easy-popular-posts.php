@@ -1,359 +1,199 @@
 <?php
-/*
-Plugin Name: Easy Popular Posts
-Plugin URI: http://thisismyurl.com/downloads/easy-popular-posts/
-Description: An easy to use WordPress function to add Popular Posts to any theme.
-Author: Christopher Ross
-Author URI: http://thisismyurl.com/
-Tags: future, upcoming posts, upcoming post, upcoming, draft, Post, popular, preview, plugin, post, posts
-Version: 15.01.12
-*/
-
-
 /**
+ * Plugin Name: Easy Popular Posts
+ * Plugin URI:  https://thisismyurl.com/downloads/easy-popular-posts/
+ * Description: An easy-to-use WordPress widget and shortcode to add popular posts to any theme.
+ * Author:      Christopher Ross
+ * Author URI:  https://thisismyurl.com/
+ * Version:     26.05.0
+ * License:     GPL-2.0-or-later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain: easy-popular-posts
+ * Domain Path: /languages
  *
- * Easy Popular Posts core file
- *
- * This file contains all the logic required for the plugin
- *
- * @link		http://wordpress.org/extend/plugins/easy-popular-posts/
- *
- * @package 	Easy Popular Posts
- * @copyright	Copyright (c) 2008, Chrsitopher Ross
- * @license		http://www.gnu.org/licenses/old-licenses/gpl-2.0.html GNU General Public License, v2 (or newer)
- *
- * @since 		Easy Popular Posts 1.0
- *
- *
+ * @package Easy_Popular_Posts
+ * @copyright Copyright (c) 2008, Christopher Ross
  */
 
-/* if the plugin is called directly, die */
-if ( ! defined( 'WPINC' ) )
+if ( ! defined( 'WPINC' ) ) {
 	die;
-	
-	
-define( 'THISISMYURL_EPP_NAME', 'Easy Popular Posts' );
+}
+
+define( 'THISISMYURL_EPP_NAME',      'Easy Popular Posts' );
 define( 'THISISMYURL_EPP_SHORTNAME', 'Easy Popular Posts' );
+define( 'THISISMYURL_EPP_VERSION',   '26.05.0' );
+define( 'THISISMYURL_EPP_FILENAME',  plugin_basename( __FILE__ ) );
+define( 'THISISMYURL_EPP_FILEPATH',  plugin_dir_path( __FILE__ ) );
+define( 'THISISMYURL_EPP_URL',       plugin_dir_url( __FILE__ ) );
+define( 'THISISMYURL_EPP_NAMESPACE', 'easy-popular-posts' );
 
-define( 'THISISMYURL_EPP_FILENAME', plugin_basename( __FILE__ ) );
-define( 'THISISMYURL_EPP_FILEPATH', dirname( plugin_basename( __FILE__ ) ) );
-define( 'THISISMYURL_EPP_FILEPATHURL', plugin_dir_url( __FILE__ ) );
+require_once plugin_dir_path( __FILE__ ) . 'thisismyurl-common.php';
 
-define( 'THISISMYURL_EPP_NAMESPACE', basename( THISISMYURL_EPP_FILENAME, '.php' ) );
-define( 'THISISMYURL_EPP_TEXTDOMAIN', str_replace( '-', '_', THISISMYURL_EPP_NAMESPACE ) );
-
-define( 'THISISMYURL_EPP_VERSION', '15.01' );
-
-include_once( 'thisismyurl-common.php' );
-
-/**
- * Creates the class required for Easy Popular Posts
- *
- * @author     Christopher Ross <info@thisismyurl.com>
- * @version    Release: @15.01@
- * @see        wp_enqueue_scripts()
- * @since      Class available since Release 14.11
- *
- */
-if( ! class_exists( 'thisismyurl_EasyPopularPosts' ) ) {
-class thisismyurl_EasyPopularPosts extends thisismyurl_Common_EPP {
+if ( ! class_exists( 'Thisismyurl_Easy_Popular_Posts' ) ) {
 	/**
-	  * Standard Constructor
-	  *
-	  * @access public
-	  * @static
-	  * @uses http://codex.wordpress.org/Function_Reference/add_shortcode
-	  * @since Method available since Release 15.01
-	  *
-	  */
-	public function run() {
-		
-		add_action( 'widgets_init', array( $this, 'widget_init' ) );
-		
-		
-		add_action( 'wp_head', array( $this, 'wp_head' ) );
-		add_shortcode( 'thisismyurl_easy_popular_posts', array( $this, 'easy_popular_posts_shortcode' ) );
-		
-	}
-	
-	
-	
-	/**
-	  * easy_popular_posts_shortcode helper function
-	  *
-	  * @access public
-	  * @static
-	  * @since Method available since Release 14.11
-	  *
-	  */
-	 function easy_popular_posts_shortcode() {
-	
-		$popular_posts = $this->easy_popular_posts();
-		
-		if ( ! empty( $popular_posts ) )
-			echo '<ul class="thisismyurl-easy-popular-posts">' . $popular_posts . '</ul>';
-			
-	} 
-	
-	
-	/**
-	  * wp_head 
-	  *
-	  * @access public
-	  * @static
-	  * @since Method available since Release 14.11
-	  *
-	  */
-	 function wp_head() {
-		
-		/* only run this on single pages */
-		if ( is_single() ) {
-		
-			global $post;
-			
-			/* check when it was last run */
-			$last_run = get_transient( 'easy-popular-posts-' . $post->ID );
-			$comment_array = get_comments( array( 'post_id'=>$post->ID ) );
-			$pageviews = get_post_meta( $post->ID, '_easy-popular-posts-pageviews', true );
-			
-			/* only run when required */
-			if ( isset( $last_run ) && empty( $last_run ) ) {
-				$social_count = 0;
-				
-				$permalink = get_permalink( $post->ID );
-				
-				$twitter_api = wp_remote_get( 'http://urls.api.twitter.com/1/urls/count.json?url=' .$permalink );
-				if ( isset( $twitter_api ) )
-					$twitter_api = json_decode( $twitter_api['body'] );
-				
-				$facebook_api = wp_remote_get( 'http://graph.facebook.com/?id=' . $permalink );
-				if ( isset( $facebook_api ) )
-					$facebook_api = json_decode( $facebook_api['body'] );
-				
-				$linkedin_api = wp_remote_get( 'http://www.linkedin.com/countserv/count/share?url=' . $permalink .'&format=json' );
-				if ( isset( $linkedin_api ) )
-					$linkedin_api = json_decode( $linkedin_api['body'] );
-				
-				$stumbleupon_api = wp_remote_get( 'http://www.stumbleupon.com/services/1.01/badge.getinfo?url=' . $permalink );
-				if ( isset( $stumbleupon_api ) )
-					$stumbleupon_api = json_decode( $stumbleupon_api['body'] );
-	
-							
-				if( isset( $twitter_api->count ) && is_int( $twitter_api->count ) ) {
-					update_post_meta( $post->ID, '_easy-popular-posts-twitter', $twitter_api->count );
-					$social_count = $social_count + $twitter_api->count;
-				}
-				
-				if( isset( $facebook_api->shares ) && is_int( $facebook_api->shares ) ) {
-					update_post_meta( $post->ID, '_easy-popular-posts-facebook', $facebook_api->shares );
-					$social_count = $social_count + $facebook_api->shares;
-				}
-	
-				
-				if( isset( $linkedin_api->count ) && is_int( $linkedin_api->count ) ) {
-					update_post_meta( $post->ID, '_easy-popular-posts-linkedin', $linkedin_api->count );
-					$social_count = $social_count + $linkedin_api->count;
-				}
-				
-				if( isset( $stumbleupon_api->result->views ) && is_int( $stumbleupon_api->result->views ) ) {
-					update_post_meta( $post->ID, '_easy-popular-posts-stumbleupon', $stumbleupon_api->result->views );
-					$social_count = $social_count + $stumbleupon_api->result->views;
-				}
-				
-				if( isset( $social_count ) && is_int( $social_count ) )
-					update_post_meta( $post->ID, '_easy-popular-posts-social', $social_count );
-								
-				/* set the last run transient */
-				set_transient( 'easy-popular-posts-' . $post->ID , 1 , ( 60 * 60 * 3 ) );
-			  
-			  }	
-				  
-			  if( isset( $comment_array ) )
-				  update_post_meta( $post->ID, '_easy-popular-posts-comments', count( $comment_array ) );
-			  
-			  if( isset( $pageviews ) )
-				  update_post_meta( $post->ID, '_easy-popular-posts-pageviews', $pageviews + 1 );
-			  else
-				  update_post_meta( $post->ID, '_easy-popular-posts-pageviews', 1 );
+	 * Main plugin class.
+	 *
+	 * @since 15.01
+	 */
+	class Thisismyurl_Easy_Popular_Posts extends Thisismyurl_Common_EPP {
+
+		/**
+		 * Register hooks.
+		 */
+		public function run() {
+			add_action( 'widgets_init', array( $this, 'widget_init' ) );
+			add_action( 'wp_head', array( $this, 'wp_head' ) );
+			add_shortcode( 'thisismyurl_easy_popular_posts', array( $this, 'easy_popular_posts_shortcode' ) );
 		}
-	
-		
-	}
-	
-	
-	/**
-	  * easy_popular_posts
-	  *
-	  * @access public
-	  * @static
-	  * @since Method available since Release 14.11
-	  *
-	  */
-	function easy_popular_posts( $options = NULL ) {
 
-		global $post;
-		
-		$options = wp_parse_args( $options, $this->popular_posts_defaults() );
-
-		$args = array(
-			'post_per_page' => $options['post_count'],
-			'post_type'	=>	'post',
-			'meta_key' => '_easy-popular-posts-' . $options['display_method'],
-            'orderby'   => 'meta_value_num',
-		);
-	
-		$popular_posts = get_posts( $args );
-		
-		if( isset( $popular_posts ) && ! empty( $popular_posts ) ) {
-			foreach ( $popular_posts as $popular_post ) {
-	
-				/* place the post title */
-				
-				$popular_item = sprintf( '<span class="title">%s (%s)</span>', 
-											esc_html( get_the_title( $popular_post->ID ) ),
-											number_format( get_post_meta( $popular_post->ID, '_easy-popular-posts-' . $options['display_method'], true ) )
-								);
-				
-				
-				/* if there's a link, display it */
-				if ( $options['include_link'] == 1 ) {
-				
-					if( $options['nofollow'] == 1 )
-						$nofollow = 'nofollow';
-					else
-						$nofollow = '';
-						
-					$popular_item = sprintf( '<span class="title-link"><a href="%s" title="%s" %s >%s</a><span>',
-											get_permalink( $popular_post->ID ),
-											esc_attr( get_the_title( $popular_post->ID ) ),
-											$nofollow,
-											$popular_item
-									);	
-					
-				}
-				
-				
-				/* feature image, if there is one */
-				if ( $options['feature_image'] == 1 && has_post_thumbnail( $popular_post->ID ) ) {
-					$popular_item = sprintf( '<div class="thumbnail">%s</div>%s', 
-											get_the_post_thumbnail($thepost->ID,'thumbnail'),
-											$popular_item
-											);
-				}
-				
-				
-				/* show the excerpt when it's required */
-				if ( $options['show_excerpt'] == 1 && ! empty( $popular_post->post_excerpt ) ) {
-					
-					$popular_item = sprintf( '%s<div class="excerpt">%s</div>', 
-											$popular_item,
-											esc_html( $popular_post->post_excerpt )
-											);
-				}
-				
-	
-				/* wrap the content in the proper tags */
-				$popular[] =  $options['before'] . $popular_item . $options['after'];
-		
+		/**
+		 * Shortcode handler.
+		 */
+		public function easy_popular_posts_shortcode() {
+			$popular_posts = $this->easy_popular_posts();
+			if ( ! empty( $popular_posts ) ) {
+				// Output is escaped per-element inside easy_popular_posts().
+				echo '<ul class="thisismyurl-easy-popular-posts">' . $popular_posts . '</ul>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			}
-	
 		}
 
-		/* return in the proper format */
-		if ( ! empty( $popular ) ) {
+		/**
+		 * Track comment counts and pageviews on single posts.
+		 *
+		 * Social share-count API calls were removed in v26.05.0 — all of those
+		 * third-party APIs (Twitter, Facebook, LinkedIn, StumbleUpon) are shut down.
+		 */
+		public function wp_head() {
+			if ( ! is_single() ) {
+				return;
+			}
+			global $post;
 
-			if ( 0 != $options['show'] )
-				echo implode( '', $popular );
-			else
-				return implode( '', $popular );
-		
+			$comment_count = (int) wp_count_comments( $post->ID )->approved;
+			update_post_meta( $post->ID, '_easy-popular-posts-comments', $comment_count );
+
+			$pageviews = (int) get_post_meta( $post->ID, '_easy-popular-posts-pageviews', true );
+			update_post_meta( $post->ID, '_easy-popular-posts-pageviews', $pageviews + 1 );
 		}
-	
-	}
-	
-	/**
-	  * popular_posts_defaults sets defaults for plugin
-	  *
-	  * @access public
-	  * @static
-	  * @since Method available since Release 14.11
-	  *
-	  */	 
-	function popular_posts_defaults() {
-	
-		$default_options = array(
-									'title'     		=> __( 'Easy Popular Posts', THISISMYURL_EPP_NAME ),
-									'post_count'    	=> 10,
-									'order'    			=> 'DESC',
-									'include_link' 		=> 1,
-									'before'   			=> '<li>',
-									'after'    			=> '</li>',
-									'nofollow' 			=> 0,
-									'show_excerpt' 		=> 0,
-									'feature_image' 	=> 0,
-									'show_credit' 		=> 1,
-									'display_method' 	=> 'pageviews',
-									'show'     			=> 0,
-									
-								);
-								
-		return $default_options;						
-								
-	}
-	
-	
-	
-	/**
-	  * widget_init activates the plugin widgets
-	  *
-	  * @access public
-	  * @static
-	  * @uses register_widget
-	  * @since Method available since Release 15.01
-	  *
-	  */
-	function widget_init() {
-		
-		include_once( 'widgets/thisismyurl_EasyPopularPosts_Widget.php' );
-		register_widget( 'thisismyurl_EasyPopularPosts_Widget' );
-	
-	}
 
-	  
-	
+		/**
+		 * Retrieve and format popular posts.
+		 *
+		 * @param array|null $options Override defaults. When $options['show'] === 0 (default)
+		 *                            returns the HTML string; when non-zero, echoes directly.
+		 * @return string|void
+		 */
+		public function easy_popular_posts( $options = null ) {
+			$options = wp_parse_args( $options, $this->popular_posts_defaults() );
+
+			$args = array(
+				'posts_per_page' => absint( $options['post_count'] ),
+				'post_type'      => 'post',
+				'post_status'    => 'publish',
+				'meta_key'       => '_easy-popular-posts-' . $options['display_method'], // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'orderby'        => 'meta_value_num',
+				'order'          => 'DESC',
+			);
+
+			$posts  = get_posts( $args );
+			$output = array();
+
+			foreach ( $posts as $popular_post ) {
+				$count = (int) get_post_meta( $popular_post->ID, '_easy-popular-posts-' . $options['display_method'], true );
+
+				$item = sprintf(
+					'<span class="title">%s (%s)</span>',
+					esc_html( get_the_title( $popular_post->ID ) ),
+					number_format_i18n( $count )
+				);
+
+				if ( 1 === (int) $options['include_link'] ) {
+					$rel  = ( 1 === (int) $options['nofollow'] ) ? ' rel="nofollow noopener noreferrer"' : '';
+					$item = sprintf(
+						'<span class="title-link"><a href="%s" title="%s"%s>%s</a></span>',
+						esc_url( get_permalink( $popular_post->ID ) ),
+						esc_attr( get_the_title( $popular_post->ID ) ),
+						$rel,
+						$item
+					);
+				}
+
+				if ( 1 === (int) $options['feature_image'] && has_post_thumbnail( $popular_post->ID ) ) {
+					$item = sprintf(
+						'<div class="thumbnail">%s</div>%s',
+						get_the_post_thumbnail( $popular_post->ID, 'thumbnail' ),
+						$item
+					);
+				}
+
+				if ( 1 === (int) $options['show_excerpt'] && ! empty( $popular_post->post_excerpt ) ) {
+					$item = sprintf(
+						'%s<div class="excerpt">%s</div>',
+						$item,
+						esc_html( $popular_post->post_excerpt )
+					);
+				}
+
+				$output[] = $options['before'] . $item . $options['after'];
+			}
+
+			if ( ! empty( $output ) ) {
+				$html = implode( '', $output );
+				if ( 0 !== (int) $options['show'] ) {
+					echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				} else {
+					return $html;
+				}
+			}
+		}
+
+		/**
+		 * Return default options.
+		 *
+		 * @return array
+		 */
+		public function popular_posts_defaults() {
+			return array(
+				'title'          => __( 'Easy Popular Posts', 'easy-popular-posts' ),
+				'post_count'     => 10,
+				'include_link'   => 1,
+				'before'         => '<li>',
+				'after'          => '</li>',
+				'nofollow'       => 0,
+				'show_excerpt'   => 0,
+				'feature_image'  => 0,
+				'show_credit'    => 1,
+				'display_method' => 'pageviews',
+				'show'           => 0,
+			);
+		}
+
+		/**
+		 * Register the widget.
+		 */
+		public function widget_init() {
+			require_once plugin_dir_path( __FILE__ ) . 'widgets/class-thisismyurl-easy-popular-posts-widget.php';
+			register_widget( 'Thisismyurl_Easy_Popular_Posts_Widget' );
+		}
+	}
 }
-}
 
-global $thisismyurl_EasyPopularPosts;
+global $thisismyurl_easy_popular_posts;
+$thisismyurl_easy_popular_posts = new Thisismyurl_Easy_Popular_Posts();
+$thisismyurl_easy_popular_posts->run();
 
-$thisismyurl_EasyPopularPosts = new thisismyurl_EasyPopularPosts;
-
-$thisismyurl_EasyPopularPosts->run();
-
-
-
-
-/**
-  * Allows theme authors to call 
-  *
-  * @access public
-  * @static
-  * @uses $thisismyurl_EasyPopularPosts->easy_popular_posts
-  * @since Method available since Release 15.01
-  *
-  * @param  array see $thisismyurl_EasyPopularPosts->popular_posts_defaults() for accepted options
-  *
-  */
 if ( ! function_exists( 'thisismyurl_easy_popular_posts' ) ) {
-function thisismyurl_easy_popular_posts( $options = NULL ) {
-	
-	global $thisismyurl_EasyPopularPosts;
-
-	if ( ! isset( $options ) ) 
-		$options = wp_parse_args( array( 'show'=> 1 ), $thisismyurl_EasyPopularPosts->popular_posts_defaults() );
-
-	
-	$thisismyurl_EasyPopularPosts->easy_popular_posts( $options );
-
-}
+	/**
+	 * Template tag for theme files.
+	 *
+	 * @param array|null $options See Thisismyurl_Easy_Popular_Posts::popular_posts_defaults().
+	 */
+	function thisismyurl_easy_popular_posts( $options = null ) {
+		global $thisismyurl_easy_popular_posts;
+		$options = wp_parse_args(
+			(array) $options,
+			array_merge( $thisismyurl_easy_popular_posts->popular_posts_defaults(), array( 'show' => 1 ) )
+		);
+		$thisismyurl_easy_popular_posts->easy_popular_posts( $options );
+	}
 }
