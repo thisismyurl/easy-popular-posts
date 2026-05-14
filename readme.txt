@@ -41,6 +41,7 @@ Yes. The widget outputs a `<ul>` with class `widget_thisismyurl_popular_posts`. 
 == Changelog ==
 
 = 26.05.0 =
+* Removed legacy `thisismyurl-common.php` inheritance; shared hooks are now inlined in the main plugin class.
 * Removed all dead social-share API calls (Twitter/Facebook/LinkedIn/StumbleUpon APIs are shut down).
 * Removed social display methods from widget dropdown; ranking is now pageviews or comments only.
 * Migrated widget to `parent::__construct()` and `$this->get_field_id()` / `$this->get_field_name()`.

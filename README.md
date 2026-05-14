@@ -29,6 +29,8 @@ Display your most popular posts by pageviews or comment count. No external servi
 
 On every single-post page load the plugin increments a counter in post meta (`_easy-popular-posts-pageviews`). Comment counts read directly from WordPress core data. No cookies, no external APIs.
 
+As of the latest refactor, the plugin no longer depends on the legacy `thisismyurl-common.php` base class; lifecycle hooks are now registered directly in the main plugin class for simpler maintenance.
+
 ## Shortcode
 
 ```
