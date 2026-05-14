@@ -2,7 +2,7 @@
 Contributors: christopherross
 Tags: popular posts, popular, sidebar, widget
 Requires at least: 6.0
-Tested up to: 6.8
+Tested up to: 6.9
 Requires PHP: 7.4
 Stable tag: 26.05.0
 License: GPL-2.0-or-later
